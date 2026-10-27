@@ -1,0 +1,76 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Agendar hora | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Reserva tu momento</span>
+        <h2 class="title">Agendar <em>Servicio</em></h2>
+
+        <div class="agenda-grid">
+            <div class="agenda-form">
+
+                {# Paso 1: elegir fecha (GET) — así solo se muestran horarios realmente disponibles #}
+                <form method="get" class="fecha-form">
+                    <div class="form-group">
+                        <label for="fecha">1. Elige una fecha</label>
+                        <div class="inline-form">
+                            <input type="date" id="fecha" name="fecha" min="{{ hoy|date:'Y-m-d' }}"
+                                   value="{{ fecha|date:'Y-m-d' }}" required>
+                            <button class="btn ghost small" type="submit">Ver horarios</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if form.non_field_errors or form.fecha.errors %}
+                <div class="mensaje error">
+                    {{ form.non_field_errors }} {{ form.fecha.errors }}
+                </div>
+                {% endif %}
+
+                {# Paso 2: datos y hora (POST) #}
+                {% if fecha %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="fecha" value="{{ fecha|date:'Y-m-d' }}">
+
+                    <div class="form-group">
+                        <label for="{{ form.cliente_nombre.id_for_label }}">{{ form.cliente_nombre.label }}</label>
+                        {{ form.cliente_nombre }} {{ form.cliente_nombre.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.servicio.id_for_label }}">{{ form.servicio.label }}</label>
+                        {{ form.servicio }} {{ form.servicio.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label>2. Elige una hora para el {{ fecha|date:'d/m/Y' }}</label>
+                        <div class="horas-grid">
+                            {% for hora, libre in horarios %}
+                            <label class="time-slot {% if not libre %}ocupada{% endif %}">
+                                <input type="radio" name="hora" value="{{ hora }}"
+                                       {% if not libre %}disabled{% endif %}
+                                       {% if form.hora.value == hora %}checked{% endif %} required>
+                                {{ hora }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {{ form.hora.errors }}
+                    </div>
+                    <button class="btn gold full" type="submit">Abonar {{ porcentaje_abono }}% y Confirmar (simulado)</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="agenda-info">
+                <h3>¿Cómo funciona?</h3>
+                <ul>
+                    <li><span class="n">1</span> <div><strong>Elige tu servicio y horario</strong><br><small class="muted">Solo ves los horarios disponibles.</small></div></li>
+                    <li><span class="n">2</span> <div><strong>Paga tu abono</strong><br><small class="muted">Reserva segura pagando el {{ porcentaje_abono }}% (pago simulado).</small></div></li>
+                    <li><span class="n">3</span> <div><strong>¡Listo!</strong><br><small class="muted">Te esperaremos en nuestro centro de belleza.</small></div></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

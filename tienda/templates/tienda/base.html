@@ -1,0 +1,40 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}RG Beauty SPA | Tienda y Reservas{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'tienda/css/style.css' %}">
+</head>
+<body class="pastel-theme">
+
+    <header class="site-header">
+        <div class="wrap header-flex">
+            <a class="logo" href="{% url 'tienda:inicio' %}">RG <em>Beauty</em> SPA</a>
+            <nav class="nav-tabs">
+                <a class="nav-btn {% if request.resolver_match.url_name == 'inicio' %}active{% endif %}" href="{% url 'tienda:inicio' %}">Tienda</a>
+                <a class="nav-btn {% if request.resolver_match.url_name == 'agendar' %}active{% endif %}" href="{% url 'tienda:agendar' %}">Agendar Hora</a>
+                <a class="nav-btn {% if request.resolver_match.url_name == 'carrito' %}active{% endif %}" href="{% url 'tienda:carrito' %}">Carrito ({{ carrito_cantidad }})</a>
+                <a class="nav-btn" href="{% url 'admin:index' %}">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="wrap mensajes">
+        {% for mensaje in messages %}
+        <div class="mensaje {{ mensaje.tags }}">{{ mensaje }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">RG Beauty SPA · Proyecto académico (pagos simulados)</div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Carrito | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Tu pedido</span>
+        <h2 class="title">Carrito de <em>compras</em></h2>
+
+        {% if items %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Producto</th><th>Precio Ud.</th><th>Cant.</th><th>Subtotal</th><th>Acción</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.producto.nombre }}</td>
+                        <td>${{ item.producto.precio }}</td>
+                        <td>
+                            <form method="post" action="{% url 'tienda:actualizar_carrito' item.producto.id %}" class="inline-form">
+                                {% csrf_token %}
+                                <input type="number" name="cantidad" value="{{ item.cantidad }}" min="0" max="{{ item.producto.stock }}">
+                                <button class="btn ghost small" type="submit">Actualizar</button>
+                            </form>
+                        </td>
+                        <td>${{ item.subtotal }}</td>
+                        <td>
+                            <form method="post" action="{% url 'tienda:quitar_del_carrito' item.producto.id %}">
+                                {% csrf_token %}
+                                <button class="btn ghost small" type="submit">Quitar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="total-carrito">Total a pagar: ${{ total }}</div>
+
+        <form method="post" action="{% url 'tienda:pagar' %}" class="pago-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.cliente_nombre.id_for_label }}">{{ form.cliente_nombre.label }}</label>
+                {{ form.cliente_nombre }}
+                {{ form.cliente_nombre.errors }}
+            </div>
+            <div class="actions center-actions">
+                <button class="btn gold" type="submit">Pagar Seguro (simulado)</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="lead">Tu carrito está vacío.</p>
+        <a class="btn gold" href="{% url 'tienda:inicio' %}">Ir a la tienda</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'tienda/base.html' %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Cuidado capilar en casa</span>
+        <h2 class="title">Nuestra <em>tienda</em></h2>
+        <p class="lead">Continúa tu tratamiento de belleza con nuestra selección exclusiva de productos profesionales.</p>
+
+        <div class="chips">
+            <a class="chip {% if not categoria_activa %}active{% endif %}" href="{% url 'tienda:inicio' %}">Todos</a>
+            {% for categoria in categorias %}
+            <a class="chip {% if categoria_activa == categoria.id %}active{% endif %}" href="?categoria={{ categoria.id }}">{{ categoria.nombre }}</a>
+            {% endfor %}
+        </div>
+
+        <div class="grid">
+            {% for producto in productos %}
+            <article class="card">
+                {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+                {% else %}
+                <div class="img-placeholder">{{ producto.nombre|first }}</div>
+                {% endif %}
+                <div class="card-body">
+                    {% if producto.categoria %}<small class="muted">{{ producto.categoria }}</small>{% endif %}
+                    <h3>{{ producto.nombre }}</h3>
+                    <p>{{ producto.descripcion }}</p>
+                    <div class="card-footer">
+                        <strong class="precio">${{ producto.precio }}</strong>
+                        <small class="muted">
+                            {% if producto.stock > 0 %}Stock: {{ producto.stock }}{% else %}Agotado{% endif %}
+                        </small>
+                    </div>
+                    <form method="post" action="{% url 'tienda:agregar_al_carrito' producto.id %}">
+                        {% csrf_token %}
+                        <button class="btn gold" type="submit" {% if producto.stock == 0 %}disabled{% endif %}>Agregar al carrito</button>
+                    </form>
+                </div>
+            </article>
+            {% empty %}
+            <p class="muted">Aún no hay productos. Agrégalos desde el panel de administración.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

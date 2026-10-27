@@ -1,0 +1,28 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Compra realizada | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">¡Gracias, {{ pedido.cliente_nombre }}!</span>
+        <h2 class="title">Compra <em>realizada</em></h2>
+        <p class="lead">Pedido #{{ pedido.id }} · pago simulado exitoso.</p>
+
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Producto</th><th>Cant.</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                    {% for item in pedido.items.all %}
+                    <tr><td>{{ item.producto.nombre }}</td><td>{{ item.cantidad }}</td><td>${{ item.subtotal }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="total-carrito">Total pagado: ${{ pedido.total }}</div>
+        <div class="actions center-actions">
+            <a class="btn gold" href="{% url 'tienda:inicio' %}">Seguir comprando</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

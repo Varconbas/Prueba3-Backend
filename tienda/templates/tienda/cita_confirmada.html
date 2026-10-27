@@ -1,0 +1,38 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Reserva confirmada | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">¡Gracias, {{ cita.cliente_nombre }}!</span>
+        <h2 class="title">Reserva <em>confirmada</em></h2>
+        <div class="pastel-card">
+            <p><strong>Servicio:</strong> {{ cita.servicio.nombre }}</p>
+            <p><strong>Fecha y hora:</strong> {{ cita.fecha|date:'d/m/Y' }} a las {{ cita.hora|time:'H:i' }}</p>
+            <p><strong>Abono pagado (simulado):</strong> ${{ cita.abono }}</p>
+        </div>
+
+        {% with recomendados=cita.servicio.productos_recomendados.all %}
+        {% if recomendados %}
+        <h3 class="subtitulo">Continúa tu tratamiento en casa</h3>
+        <div class="grid">
+            {% for producto in recomendados %}
+            <article class="card">
+                <div class="card-body">
+                    <h3>{{ producto.nombre }}</h3>
+                    <p>{{ producto.descripcion }}</p>
+                    <strong class="precio">${{ producto.precio }}</strong>
+                    <form method="post" action="{% url 'tienda:agregar_al_carrito' producto.id %}">
+                        {% csrf_token %}
+                        <button class="btn gold" type="submit" {% if producto.stock == 0 %}disabled{% endif %}>Agregar al carrito</button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+</section>
+{% endblock %}
