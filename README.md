@@ -38,3 +38,8 @@ Stock y pagos están **simulados**; el CSS es un placeholder (blanco, morado y r
 - `Servicio` N:M `Producto` (`productos_recomendados`, `related_name='servicios'`)
 - `Servicio` 1:N `Cita` (FK, `related_name='citas'`)
 - `Pedido` 1:N `ItemPedido` (FK, `related_name='items'`) y `Producto` 1:N `ItemPedido`
+
+## Por hacer:
+- Roles (Usuario, Admin)
+- Mejorar el agendamiento de las citas (Que un usuario pida una cita, quede en espera, que el admin pueda aceptar o no esa cita, y el usuario pueda cancelar en cualquier momento.)
+- En el apartado de usuarios, uno pueda ver las citas agendadas actuales y con anterioridad
