@@ -81,3 +81,8 @@ USE_THOUSAND_SEPARATOR = True   # $12.990 en vez de $12990
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Cuentas de usuario ---
+LOGIN_URL = 'tienda:login'                # a dónde manda @login_required
+LOGIN_REDIRECT_URL = 'tienda:inicio'      # después de iniciar sesión
+LOGOUT_REDIRECT_URL = 'tienda:inicio'     # después de cerrar sesión

@@ -1,12 +1,15 @@
 from datetime import date
 
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .forms import CitaForm, PagoForm
+from .forms import CitaForm, PagoForm, RegistroForm
 from .models import (
     HORARIOS, PORCENTAJE_ABONO, Categoria, Cita, ItemPedido, Pedido, Producto,
 )
@@ -14,6 +17,10 @@ from .models import (
 
 class StockInsuficiente(Exception):
     pass
+
+def _nombre_de(usuario):
+    """Nombre para prellenar formularios."""
+    return usuario.get_full_name() or usuario.username
 
 
 # ----------------------------------------------------------------- Tienda ---
@@ -48,8 +55,12 @@ def _detalle_carrito(request):
 
 def ver_carrito(request):
     items, total = _detalle_carrito(request)
+    if request.user.is_authenticated:
+        form = PagoForm(initial={'cliente_nombre': _nombre_de(request.user)})
+    else:
+        form = PagoForm()
     return render(request, 'tienda/carrito.html', {
-        'items': items, 'total': total, 'form': PagoForm(),
+        'items': items, 'total': total, 'form': form,
     })
 
 
@@ -94,7 +105,7 @@ def quitar_del_carrito(request, producto_id):
     request.session['carrito'] = carrito
     return redirect('tienda:carrito')
 
-
+@login_required
 @require_POST
 def pagar(request):
     """Pago SIMULADO: crea el pedido, descuenta stock y vacía el carrito."""
@@ -110,8 +121,9 @@ def pagar(request):
     try:
         with transaction.atomic():
             pedido = Pedido.objects.create(
+                usuario=request.user,
                 cliente_nombre=form.cleaned_data['cliente_nombre'], pagado=True,
-            )
+            )            
             total_pedido = 0
             for item in items:
                 # select_for_update bloquea la fila mientras se descuenta el stock
@@ -162,13 +174,15 @@ def _horarios(fecha):
     }
     return [(hora, hora not in ocupadas) for hora in HORARIOS]
 
-
+@login_required
 def agendar(request):
     if request.method == 'POST':
         fecha = _parsear_fecha(request.POST.get('fecha'))
-        form = CitaForm(request.POST)
+        form = CitaForm(initial={'cliente_nombre': _nombre_de(request.user)})
         if form.is_valid():
             cita = form.save(commit=False)
+            cita = form.save(commit=False)
+            cita.usuario = request.user
             # Pago SIMULADO: el abono se da por pagado al confirmar.
             cita.abono = cita.servicio.abono
             cita.abono_pagado = True
@@ -198,3 +212,41 @@ def cita_confirmada(request):
         pk=cita_id,
     )
     return render(request, 'tienda/cita_confirmada.html', {'cita': cita})
+
+# ---------------------------------------------------------------- Cuentas ---
+def registro(request):
+    if request.user.is_authenticated:
+        return redirect('tienda:inicio')
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            login(request, usuario)   # inicia sesión de inmediato
+            messages.success(request, f'¡Bienvenido/a, {usuario.first_name}!')
+            return redirect('tienda:inicio')
+    else:
+        form = RegistroForm()
+    return render(request, 'tienda/registro.html', {'form': form})
+
+
+@login_required
+def mis_citas(request):
+    hoy = timezone.localdate()
+    # Siempre se filtra por request.user: nadie ve citas ajenas.
+    citas = Cita.objects.filter(usuario=request.user).select_related('servicio')
+    proximas = citas.filter(fecha__gte=hoy).exclude(estado=Cita.CANCELADA)
+    pasadas = citas.filter(
+        Q(fecha__lt=hoy) | Q(estado=Cita.CANCELADA)
+    ).order_by('-fecha', '-hora')
+    return render(request, 'tienda/mis_citas.html', {
+        'proximas': proximas, 'pasadas': pasadas,
+    })
+
+
+@login_required
+def mis_compras(request):
+    pedidos = (
+        Pedido.objects.filter(usuario=request.user)
+        .prefetch_related('items__producto')
+    )
+    return render(request, 'tienda/mis_compras.html', {'pedidos': pedidos})

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -76,6 +77,10 @@ class Cita(models.Model):
 
     cliente_nombre = models.CharField(max_length=100)
     servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, related_name='citas')
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        related_name='citas', null=True, blank=True,
+    )    
     fecha = models.DateField()
     hora = models.TimeField()
     abono = models.PositiveIntegerField(default=0)
@@ -108,6 +113,10 @@ class Cita(models.Model):
 # ---------------------------------------------------------------- Pedidos ---
 class Pedido(models.Model):
     cliente_nombre = models.CharField(max_length=100)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        related_name='pedidos', null=True, blank=True,
+    )
     creado = models.DateTimeField(auto_now_add=True)
     total = models.PositiveIntegerField(default=0)
     pagado = models.BooleanField(default=False)   # pago simulado

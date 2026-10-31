@@ -43,7 +43,7 @@ def cancelar_citas(modeladmin, request, queryset):
 @admin.register(Cita)
 class CitaAdmin(admin.ModelAdmin):
     # Es la "Agenda de Citas" del panel original.
-    list_display = ('fecha', 'hora', 'cliente_nombre', 'servicio', 'abono', 'abono_pagado', 'estado')
+    list_display = ('fecha', 'hora', 'cliente_nombre', 'usuario', 'servicio', 'abono', 'abono_pagado', 'estado')    
     list_filter = ('estado', 'servicio', 'fecha')
     search_fields = ('cliente_nombre',)
     date_hierarchy = 'fecha'
@@ -59,7 +59,7 @@ class ItemPedidoInline(admin.TabularInline):
 
 @admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cliente_nombre', 'creado', 'total', 'pagado')
+    list_display = ('id', 'cliente_nombre', 'usuario', 'creado', 'total', 'pagado')    
     list_filter = ('pagado', 'creado')
     search_fields = ('cliente_nombre',)
     readonly_fields = ('creado',)
