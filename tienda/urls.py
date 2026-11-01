@@ -21,5 +21,6 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='tienda/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('mis-citas/', views.mis_citas, name='mis_citas'),
+    path('mis-citas/<int:cita_id>/cancelar/', views.cancelar_cita, name='cancelar_cita'),
     path('mis-compras/', views.mis_compras, name='mis_compras'),
 ]

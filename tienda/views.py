@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from .forms import CancelacionForm, CitaForm, PagoForm, RegistroForm
 
 from .forms import CitaForm, PagoForm, RegistroForm
 from .models import (
@@ -170,8 +171,7 @@ def _horarios(fecha):
     ocupadas = {
         hora.strftime('%H:%M')
         for hora in Cita.objects.filter(fecha=fecha)
-        .exclude(estado=Cita.CANCELADA).values_list('hora', flat=True)
-    }
+        .exclude(estado__in=Cita.ESTADOS_QUE_LIBERAN).values_list('hora', flat=True)    }
     return [(hora, hora not in ocupadas) for hora in HORARIOS]
 
 @login_required
@@ -183,10 +183,9 @@ def agendar(request):
             cita = form.save(commit=False)
             cita = form.save(commit=False)
             cita.usuario = request.user
-            # Pago SIMULADO: el abono se da por pagado al confirmar.
-            cita.abono = cita.servicio.abono
-            cita.abono_pagado = True
-            cita.estado = Cita.CONFIRMADA
+            cita.abono = cita.servicio.abono     # monto a abonar (simulado)
+            cita.abono_pagado = False            # se da por pagado cuando el salón la acepta
+            cita.estado = Cita.PENDIENTE         # queda en espera de respuesta
             cita.save()
             request.session['ultima_cita'] = cita.pk
             return redirect('tienda:cita_confirmada')
@@ -230,18 +229,20 @@ def registro(request):
 
 
 @login_required
+@login_required
 def mis_citas(request):
     hoy = timezone.localdate()
     # Siempre se filtra por request.user: nadie ve citas ajenas.
     citas = Cita.objects.filter(usuario=request.user).select_related('servicio')
-    proximas = citas.filter(fecha__gte=hoy).exclude(estado=Cita.CANCELADA)
+    proximas = citas.filter(
+        fecha__gte=hoy, estado__in=[Cita.PENDIENTE, Cita.CONFIRMADA],
+    )
     pasadas = citas.filter(
-        Q(fecha__lt=hoy) | Q(estado=Cita.CANCELADA)
+        Q(fecha__lt=hoy) | Q(estado__in=Cita.ESTADOS_QUE_LIBERAN)
     ).order_by('-fecha', '-hora')
     return render(request, 'tienda/mis_citas.html', {
         'proximas': proximas, 'pasadas': pasadas,
     })
-
 
 @login_required
 def mis_compras(request):
@@ -250,3 +251,16 @@ def mis_compras(request):
         .prefetch_related('items__producto')
     )
     return render(request, 'tienda/mis_compras.html', {'pedidos': pedidos})
+
+@login_required
+@require_POST
+def cancelar_cita(request, cita_id):
+    # Con usuario=request.user, nadie puede cancelar citas de otra persona.
+    cita = get_object_or_404(Cita, pk=cita_id, usuario=request.user)
+    form = CancelacionForm(request.POST)
+    if not cita.puede_cancelarse:
+        messages.error(request, 'Esta cita ya no se puede cancelar.')
+    elif form.is_valid():
+        cita.cancelar(form.cleaned_data['motivo'])
+        messages.success(request, 'Tu cita fue cancelada.')
+    return redirect('tienda:mis_citas')

@@ -40,3 +40,6 @@ class RegistroForm(UserCreationForm):
         model = User
         fields = ('username', 'first_name', 'email')
         labels = {'username': 'Nombre de usuario'}
+
+class CancelacionForm(forms.Form):
+    motivo = forms.CharField(max_length=300, required=False)
