@@ -7,21 +7,39 @@
     <div class="wrap">
         <span class="eyebrow">Tu agenda</span>
         <h2 class="title">Mis <em>citas</em></h2>
-        <a class="btn gold" href="{% url 'tienda:agendar' %}">Agendar nueva hora</a>
+        <a class="btn gold" href="{% url 'tienda:agendar' %}">Solicitar nueva hora</a>
 
         <h3 class="subtitulo">Próximas</h3>
         {% if proximas %}
         <div class="table-container">
             <table>
-                <thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Abono</th><th>Estado</th></tr></thead>
+                <thead>
+                    <tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr>
+                </thead>
                 <tbody>
                     {% for cita in proximas %}
                     <tr>
                         <td>{{ cita.fecha|date:'d/m/Y' }}</td>
                         <td>{{ cita.hora|time:'H:i' }}</td>
                         <td>{{ cita.servicio.nombre }}</td>
-                        <td>${{ cita.abono }}</td>
-                        <td>{{ cita.get_estado_display }}</td>
+                        <td><span class="estado estado-{{ cita.estado }}">{{ cita.get_estado_display }}</span></td>
+                        <td>
+                            {% if cita.estado == 'PENDIENTE' %}
+                            <small class="muted">Esperando respuesta del salón.</small>
+                            {% elif cita.respuesta_admin %}
+                            <small>Salón: {{ cita.respuesta_admin }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cita.puede_cancelarse %}
+                            <form method="post" action="{% url 'tienda:cancelar_cita' cita.id %}" class="cancelar-form">
+                                {% csrf_token %}
+                                <input type="text" name="motivo" maxlength="300" placeholder="Motivo (opcional)">
+                                <button class="btn ghost small" type="submit"
+                                        onclick="return confirm('¿Cancelar esta cita?')">Cancelar cita</button>
+                            </form>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -31,26 +49,31 @@
         <p class="muted">No tienes citas próximas.</p>
         {% endif %}
 
-        <h3 class="subtitulo">Pasadas y canceladas</h3>
+        <h3 class="subtitulo">Historial (pasadas, rechazadas y canceladas)</h3>
         {% if pasadas %}
         <div class="table-container">
             <table>
-                <thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Abono</th><th>Estado</th></tr></thead>
+                <thead>
+                    <tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Estado</th><th>Detalle</th></tr>
+                </thead>
                 <tbody>
                     {% for cita in pasadas %}
                     <tr>
                         <td>{{ cita.fecha|date:'d/m/Y' }}</td>
                         <td>{{ cita.hora|time:'H:i' }}</td>
                         <td>{{ cita.servicio.nombre }}</td>
-                        <td>${{ cita.abono }}</td>
-                        <td>{{ cita.get_estado_display }}</td>
+                        <td><span class="estado estado-{{ cita.estado }}">{{ cita.get_estado_display }}</span></td>
+                        <td>
+                            {% if cita.respuesta_admin %}<small>Salón: {{ cita.respuesta_admin }}</small><br>{% endif %}
+                            {% if cita.motivo_cancelacion %}<small>Tu motivo: {{ cita.motivo_cancelacion }}</small>{% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <p class="muted">Aún no tienes citas pasadas.</p>
+        <p class="muted">Aún no tienes historial de citas.</p>
         {% endif %}
     </div>
 </section>

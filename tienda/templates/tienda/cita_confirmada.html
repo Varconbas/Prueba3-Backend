@@ -1,18 +1,21 @@
 {% extends 'tienda/base.html' %}
 
-{% block titulo %}Reserva confirmada | RG Beauty SPA{% endblock %}
+{% block titulo %}Solicitud enviada | RG Beauty SPA{% endblock %}
 
 {% block contenido %}
 <section class="sec">
     <div class="wrap">
         <span class="eyebrow">¡Gracias, {{ cita.cliente_nombre }}!</span>
-        <h2 class="title">Reserva <em>confirmada</em></h2>
+        <h2 class="title">Solicitud <em>enviada</em></h2>
         <div class="pastel-card">
+            <p><strong>Estado:</strong> <span class="estado estado-{{ cita.estado }}">{{ cita.get_estado_display }}</span></p>
             <p><strong>Servicio:</strong> {{ cita.servicio.nombre }}</p>
             <p><strong>Fecha y hora:</strong> {{ cita.fecha|date:'d/m/Y' }} a las {{ cita.hora|time:'H:i' }}</p>
-            <p><strong>Abono pagado (simulado):</strong> ${{ cita.abono }}</p>
+            <p><strong>Abono a pagar al ser aceptada (simulado):</strong> ${{ cita.abono }}</p>
+            <p class="muted">El salón revisará tu solicitud. Puedes seguirla o cancelarla en
+                <a href="{% url 'tienda:mis_citas' %}"><u>Mis citas</u></a>.</p>
         </div>
-
+        
         {% with recomendados=cita.servicio.productos_recomendados.all %}
         {% if recomendados %}
         <h3 class="subtitulo">Continúa tu tratamiento en casa</h3>
