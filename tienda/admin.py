@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import Categoria, Cita, ItemPedido, Pedido, Producto, Servicio
 
@@ -30,25 +31,52 @@ class ServicioAdmin(admin.ModelAdmin):
     filter_horizontal = ('productos_recomendados',)
 
 
-@admin.action(description='Marcar citas seleccionadas como confirmadas')
-def confirmar_citas(modeladmin, request, queryset):
-    queryset.update(estado=Cita.CONFIRMADA)
+@admin.action(description='Aceptar solicitudes en espera (sin mensaje)')
+def aceptar_citas(modeladmin, request, queryset):
+    pendientes = list(queryset.filter(estado=Cita.PENDIENTE))
+    for cita in pendientes:
+        cita.aceptar()
+    modeladmin.message_user(request, f'{len(pendientes)} solicitud(es) aceptada(s).')
 
 
-@admin.action(description='Cancelar citas seleccionadas (libera la hora)')
-def cancelar_citas(modeladmin, request, queryset):
-    queryset.update(estado=Cita.CANCELADA)
+@admin.action(description='Rechazar solicitudes en espera (sin motivo)')
+def rechazar_citas(modeladmin, request, queryset):
+    pendientes = list(queryset.filter(estado=Cita.PENDIENTE))
+    for cita in pendientes:
+        cita.rechazar()
+    modeladmin.message_user(request, f'{len(pendientes)} solicitud(es) rechazada(s).')
 
 
 @admin.register(Cita)
 class CitaAdmin(admin.ModelAdmin):
-    # Es la "Agenda de Citas" del panel original.
-    list_display = ('fecha', 'hora', 'cliente_nombre', 'usuario', 'servicio', 'abono', 'abono_pagado', 'estado')    
+    # Bandeja de solicitudes: filtra por "En espera" para ver las que faltan por responder.
+    list_display = ('fecha', 'hora', 'cliente_nombre', 'usuario', 'servicio',
+                    'abono', 'abono_pagado', 'estado')
     list_filter = ('estado', 'servicio', 'fecha')
-    search_fields = ('cliente_nombre',)
+    search_fields = ('cliente_nombre', 'usuario__username')
     date_hierarchy = 'fecha'
-    actions = [confirmar_citas, cancelar_citas]
+    actions = [aceptar_citas, rechazar_citas]
+    readonly_fields = ('creada', 'respondida_el', 'motivo_cancelacion')
+    fieldsets = (
+        ('Solicitud', {'fields': ('cliente_nombre', 'usuario', 'servicio', 'fecha', 'hora')}),
+        ('Abono (simulado)', {'fields': ('abono', 'abono_pagado')}),
+        ('Respuesta del salón', {
+            'fields': ('estado', 'respuesta_admin'),
+            'description': 'Para aceptar o rechazar con mensaje: cambia el estado, '
+                           'escribe el mensaje (opcional) y guarda.',
+        }),
+        ('Cancelación del cliente', {'fields': ('motivo_cancelacion',)}),
+        ('Registro', {'fields': ('creada', 'respondida_el')}),
+    )
 
+    def save_model(self, request, obj, form, change):
+        # Al responder desde el formulario, deja registrado cuándo y marca el abono.
+        if change and 'estado' in form.changed_data:
+            if obj.estado == Cita.CONFIRMADA:
+                obj.abono_pagado = True
+            if obj.estado in (Cita.CONFIRMADA, Cita.RECHAZADA):
+                obj.respondida_el = timezone.now()
+        super().save_model(request, obj, form, change)
 
 class ItemPedidoInline(admin.TabularInline):
     # Se gestiona el "lado muchos" (items) desde el "lado uno" (pedido).
