@@ -101,3 +101,12 @@ input[type=text], input[type=date], input[type=number], input[type=email], input
 /* Botón "Salir" dentro del menú */
 .nav-form { margin: 0; }
 button.nav-btn { border: 0; background: none; cursor: pointer; font: inherit; font-weight: 500; }
+
+/* Estados de las citas */
+.estado { display: inline-block; padding: .2rem .7rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.estado-PENDIENTE  { background: var(--pink-soft); color: var(--purple-dark); }
+.estado-CONFIRMADA { background: #e3f4e6; color: #2e6b3a; }
+.estado-RECHAZADA  { background: #fde3ea; color: #b3205a; }
+.estado-CANCELADA  { background: #eee; color: #777; }
+
+.cancelar-form { display: flex; gap: .4rem; align-items: center; min-width: 260px; }
