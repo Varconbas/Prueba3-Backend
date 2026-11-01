@@ -41,6 +41,7 @@
 
         <div class="total-carrito">Total a pagar: ${{ total }}</div>
 
+        {% if user.is_authenticated %}
         <form method="post" action="{% url 'tienda:pagar' %}" class="pago-form">
             {% csrf_token %}
             <div class="form-group">
@@ -53,6 +54,13 @@
             </div>
         </form>
         {% else %}
+        <div class="actions center-actions">
+            <a class="btn gold" href="{% url 'tienda:login' %}?next={% url 'tienda:carrito' %}">Inicia sesión para pagar</a>
+        </div>
+        <p class="muted" style="text-align:center">
+            ¿No tienes cuenta? <a href="{% url 'tienda:registro' %}"><u>Créala aquí</u></a>. Tu carrito se mantiene.
+        </p>
+        {% endif %}        {% else %}
         <p class="lead">Tu carrito está vacío.</p>
         <a class="btn gold" href="{% url 'tienda:inicio' %}">Ir a la tienda</a>
         {% endif %}

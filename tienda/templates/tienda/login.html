@@ -1,0 +1,32 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Ingresar | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Bienvenido/a de vuelta</span>
+        <h2 class="title">Iniciar <em>sesión</em></h2>
+
+        <form method="post" class="pago-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {{ form.non_field_errors }}
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Usuario</label>
+                {{ form.username }} {{ form.username.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Contraseña</label>
+                {{ form.password }} {{ form.password.errors }}
+            </div>
+            <div class="actions center-actions">
+                <button class="btn gold" type="submit">Ingresar</button>
+            </div>
+            <p class="muted" style="text-align:center">
+                ¿Aún no tienes cuenta? <a href="{% url 'tienda:registro' %}"><u>Créala aquí</u></a>
+            </p>
+        </form>
+    </div>
+</section>
+{% endblock %}

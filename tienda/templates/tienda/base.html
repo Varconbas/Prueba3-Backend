@@ -16,8 +16,18 @@
                 <a class="nav-btn {% if request.resolver_match.url_name == 'inicio' %}active{% endif %}" href="{% url 'tienda:inicio' %}">Tienda</a>
                 <a class="nav-btn {% if request.resolver_match.url_name == 'agendar' %}active{% endif %}" href="{% url 'tienda:agendar' %}">Agendar Hora</a>
                 <a class="nav-btn {% if request.resolver_match.url_name == 'carrito' %}active{% endif %}" href="{% url 'tienda:carrito' %}">Carrito ({{ carrito_cantidad }})</a>
-                <a class="nav-btn" href="{% url 'admin:index' %}">Admin</a>
-            </nav>
+                {% if user.is_staff %}<a class="nav-btn" href="{% url 'admin:index' %}">Admin</a>{% endif %}
+                {% if user.is_authenticated %}
+                <a class="nav-btn {% if request.resolver_match.url_name == 'mis_citas' %}active{% endif %}" href="{% url 'tienda:mis_citas' %}">Mis citas</a>
+                <a class="nav-btn {% if request.resolver_match.url_name == 'mis_compras' %}active{% endif %}" href="{% url 'tienda:mis_compras' %}">Mis compras</a>
+                <form method="post" action="{% url 'tienda:logout' %}" class="nav-form">
+                    {% csrf_token %}
+                    <button class="nav-btn" type="submit">Salir ({{ user.username }})</button>
+                </form>
+                {% else %}
+                <a class="nav-btn" href="{% url 'tienda:login' %}">Ingresar</a>
+                <a class="nav-btn" href="{% url 'tienda:registro' %}">Crear cuenta</a>
+                {% endif %}            </nav>
         </div>
     </header>
 

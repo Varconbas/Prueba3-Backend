@@ -1,0 +1,37 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Mis compras | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Tu historial</span>
+        <h2 class="title">Mis <em>compras</em></h2>
+
+        {% for pedido in pedidos %}
+        <div class="pastel-card" style="margin-bottom:1.5rem">
+            <h3>Pedido #{{ pedido.id }} · {{ pedido.creado|date:'d/m/Y H:i' }}</h3>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Producto</th><th>Cant.</th><th>Precio Ud.</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        {% for item in pedido.items.all %}
+                        <tr>
+                            <td>{{ item.producto.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>${{ item.precio_unitario }}</td>
+                            <td>${{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="total-carrito">Total: ${{ pedido.total }}</div>
+        </div>
+        {% empty %}
+        <p class="lead">Todavía no tienes compras.</p>
+        <a class="btn gold" href="{% url 'tienda:inicio' %}">Ir a la tienda</a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

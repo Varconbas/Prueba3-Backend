@@ -1,0 +1,28 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Crear cuenta | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Únete</span>
+        <h2 class="title">Crear <em>cuenta</em></h2>
+
+        <form method="post" class="pago-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for campo in form %}
+            <div class="form-group">
+                <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                {{ campo }}
+                {{ campo.errors }}
+                {% if campo.help_text %}<small class="muted">{{ campo.help_text|safe }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="actions center-actions">
+                <button class="btn gold" type="submit">Crear cuenta</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

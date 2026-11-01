@@ -69,8 +69,7 @@ th { background: var(--pink-soft); color: var(--purple-dark); font-size: .85rem;
 /* Formularios */
 .form-group { margin-bottom: 1.1rem; }
 .form-group label { display: block; font-weight: 600; margin-bottom: .35rem; font-size: .9rem; }
-input[type=text], input[type=date], input[type=number], select {
-    width: 100%; padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 10px; font: inherit; background: var(--white);
+input[type=text], input[type=date], input[type=number], input[type=email], input[type=password], select {    width: 100%; padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 10px; font: inherit; background: var(--white);
 }
 .inline-form { display: flex; gap: .5rem; align-items: center; }
 .inline-form input[type=number] { width: 80px; }
@@ -98,3 +97,7 @@ input[type=text], input[type=date], input[type=number], select {
 .site-footer { border-top: 1px solid var(--border); padding: 1.5rem 0; color: var(--muted); font-size: .85rem; text-align: center; }
 
 @media (max-width: 760px) { .agenda-grid { grid-template-columns: 1fr; } }
+
+/* Botón "Salir" dentro del menú */
+.nav-form { margin: 0; }
+button.nav-btn { border: 0; background: none; cursor: pointer; font: inherit; font-weight: 500; }
