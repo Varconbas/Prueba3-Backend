@@ -1,7 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-
+from django.conf import settings
 from . import views
+from django.conf.urls.static import static
 
 app_name = 'tienda'
 
@@ -23,4 +24,4 @@ urlpatterns = [
     path('mis-citas/', views.mis_citas, name='mis_citas'),
     path('mis-citas/<int:cita_id>/cancelar/', views.cancelar_cita, name='cancelar_cita'),
     path('mis-compras/', views.mis_compras, name='mis_compras'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -26,7 +26,7 @@ class Categoria(models.Model):
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
-    imagen_url = models.URLField(blank=True)
+    imagen_url = models.ImageField(upload_to='proyecto/%Y/%m/', blank=True, null=True)
     precio = models.PositiveIntegerField(help_text='Precio en pesos chilenos.')
     stock = models.PositiveIntegerField(default=0)
     # SET_NULL: si se borra una categoría, los productos NO se borran.

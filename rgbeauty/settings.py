@@ -86,3 +86,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'tienda:login'                # a dónde manda @login_required
 LOGIN_REDIRECT_URL = 'tienda:inicio'      # después de iniciar sesión
 LOGOUT_REDIRECT_URL = 'tienda:inicio'     # después de cerrar sesión
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

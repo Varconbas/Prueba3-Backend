@@ -177,19 +177,22 @@ def _horarios(fecha):
 @login_required
 def agendar(request):
     if request.method == 'POST':
+        print("Por aqui paso algo")
         fecha = _parsear_fecha(request.POST.get('fecha'))
-        form = CitaForm(initial={'cliente_nombre': _nombre_de(request.user)})
+        #form = CitaForm(initial={'cliente_nombre': _nombre_de(request.user)})
+        form = CitaForm(request.POST)
         if form.is_valid():
-            cita = form.save(commit=False)
             cita = form.save(commit=False)
             cita.usuario = request.user
             cita.abono = cita.servicio.abono     # monto a abonar (simulado)
             cita.abono_pagado = False            # se da por pagado cuando el salón la acepta
             cita.estado = Cita.PENDIENTE         # queda en espera de respuesta
             cita.save()
+            form.save()
             request.session['ultima_cita'] = cita.pk
             return redirect('tienda:cita_confirmada')
     else:
+        print("Por aqui no deberia pasar")
         fecha = _parsear_fecha(request.GET.get('fecha'))
         form = CitaForm()
 
