@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from tienda.models import Categoria, Producto, Servicio
+from tienda.imagenes import generar_imagen_ejemplo
 
 
 class Command(BaseCommand):
@@ -19,13 +21,16 @@ class Command(BaseCommand):
             ('Crema Hidratante Facial', 'Hidratación diaria para todo tipo de piel.', 19990, 6, piel),
         ]
         obj = {}
-        for nombre, desc, precio, stock, categoria in productos:
+        for indice, (nombre, desc, precio, stock, categoria) in enumerate(productos):
             p, creado = Producto.objects.get_or_create(
                 nombre=nombre,
                 defaults={'descripcion': desc, 'precio': precio, 'stock': stock, 'categoria': categoria},
             )
+            # Imagen de ejemplo generada con Pillow, solo si el producto no tiene una.
+            if not p.imagen:
+                p.imagen.save(f'{slugify(nombre)}.jpg', generar_imagen_ejemplo(nombre, indice), save=True)
             obj[nombre] = p
-
+            
         servicios = [
             ('Corte y peinado', 'Corte personalizado con peinado final.', 25000, 60,
              ['Shampoo Reparador', 'Sérum de Brillo']),
