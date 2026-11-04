@@ -22,6 +22,11 @@
         <div class="grid">
             {% for producto in recomendados %}
             <article class="card">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                {% else %}
+                <div class="img-placeholder">{{ producto.nombre|first }}</div>
+                {% endif %}
                 <div class="card-body">
                     <h3>{{ producto.nombre }}</h3>
                     <p>{{ producto.descripcion }}</p>

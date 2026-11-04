@@ -17,8 +17,8 @@
         <div class="grid">
             {% for producto in productos %}
             <article class="card">
-                {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
                 {% else %}
                 <div class="img-placeholder">{{ producto.nombre|first }}</div>
                 {% endif %}
