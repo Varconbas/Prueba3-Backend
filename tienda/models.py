@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from .imagenes import optimizar_imagen
 from datetime import datetime
 
 # Horarios fijos de atención (los mismos botones del index.html original).
@@ -26,7 +27,7 @@ class Categoria(models.Model):
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
-    imagen_url = models.ImageField(upload_to='proyecto/%Y/%m/', blank=True, null=True)
+    imagen = models.ImageField(upload_to='productos/', blank=True)
     precio = models.PositiveIntegerField(help_text='Precio en pesos chilenos.')
     stock = models.PositiveIntegerField(default=0)
     # SET_NULL: si se borra una categoría, los productos NO se borran.
@@ -41,6 +42,11 @@ class Producto(models.Model):
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        # Solo se procesa cuando se sube una imagen nueva (no al editar precio o stock).
+        if self.imagen and not self.imagen._committed:
+            self.imagen = optimizar_imagen(self.imagen)
+        super().save(*args, **kwargs)
 
 # -------------------------------------------------------------- Servicios ---
 class Servicio(models.Model):
