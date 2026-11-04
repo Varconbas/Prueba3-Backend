@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from django.utils import timezone
 
 from .models import Categoria, Cita, ItemPedido, Pedido, Producto, Servicio
@@ -17,11 +18,20 @@ class CategoriaAdmin(admin.ModelAdmin):
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
     # Inventario de la tienda: precio y stock se editan directo en el listado.
-    list_display = ('nombre', 'categoria', 'precio', 'stock')
+    list_display = ('miniatura', 'nombre', 'categoria', 'precio', 'stock')
+    list_display_links = ('nombre',)
     list_editable = ('precio', 'stock')
     list_filter = ('categoria',)
     search_fields = ('nombre', 'descripcion')
+    readonly_fields = ('miniatura',)
 
+    @admin.display(description='Imagen')
+    def miniatura(self, obj):
+        if obj.imagen:
+            return format_html(
+                '<img src="{}" style="height:48px; border-radius:6px;">', obj.imagen.url,
+            )
+        return '—'
 
 @admin.register(Servicio)
 class ServicioAdmin(admin.ModelAdmin):
