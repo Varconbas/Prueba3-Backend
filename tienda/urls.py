@@ -24,4 +24,6 @@ urlpatterns = [
     path('mis-citas/', views.mis_citas, name='mis_citas'),
     path('mis-citas/<int:cita_id>/cancelar/', views.cancelar_cita, name='cancelar_cita'),
     path('mis-compras/', views.mis_compras, name='mis_compras'),
+    path('panel/citas/', views.panel_citas, name='panel_citas'),
+    path('panel/citas/<int:cita_id>/responder/', views.responder_cita, name='responder_cita'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

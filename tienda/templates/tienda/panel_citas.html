@@ -1,0 +1,68 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Solicitudes de citas | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Gestión interna</span>
+        <h2 class="title">Solicitudes de <em>citas</em></h2>
+
+        <h3 class="subtitulo">En espera ({{ pendientes|length }})</h3>
+        {% if pendientes %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Fecha y hora</th><th>Cliente</th><th>Servicio</th><th>Abono</th><th>Respuesta</th></tr>
+                </thead>
+                <tbody>
+                    {% for cita in pendientes %}
+                    <tr>
+                        <td>{{ cita.fecha|date:'d/m/Y' }} {{ cita.hora|time:'H:i' }}</td>
+                        <td>{{ cita.cliente_nombre }}{% if cita.usuario %}<br><small class="muted">@{{ cita.usuario.username }}</small>{% endif %}</td>
+                        <td>{{ cita.servicio.nombre }}</td>
+                        <td>${{ cita.abono }}</td>
+                        <td>
+                            <form method="post" action="{% url 'tienda:responder_cita' cita.id %}" class="cancelar-form">
+                                {% csrf_token %}
+                                <input type="text" name="mensaje" maxlength="300" placeholder="Mensaje (opcional)">
+                                <button class="btn gold small" type="submit" name="accion" value="aceptar">Aceptar</button>
+                                <button class="btn ghost small" type="submit" name="accion" value="rechazar">Rechazar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="muted">No hay solicitudes en espera.</p>
+        {% endif %}
+
+        <h3 class="subtitulo">Últimas respondidas o canceladas</h3>
+        {% if recientes %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Fecha y hora</th><th>Cliente</th><th>Servicio</th><th>Estado</th><th>Detalle</th></tr>
+                </thead>
+                <tbody>
+                    {% for cita in recientes %}
+                    <tr>
+                        <td>{{ cita.fecha|date:'d/m/Y' }} {{ cita.hora|time:'H:i' }}</td>
+                        <td>{{ cita.cliente_nombre }}</td>
+                        <td>{{ cita.servicio.nombre }}</td>
+                        <td><span class="estado estado-{{ cita.estado }}">{{ cita.get_estado_display }}</span></td>
+                        <td>
+                            {% if cita.respuesta_admin %}<small>Salón: {{ cita.respuesta_admin }}</small><br>{% endif %}
+                            {% if cita.motivo_cancelacion %}<small>Cliente: {{ cita.motivo_cancelacion }}</small>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -267,3 +268,30 @@ def cancelar_cita(request, cita_id):
         cita.cancelar(form.cleaned_data['motivo'])
         messages.success(request, 'Tu cita fue cancelada.')
     return redirect('tienda:mis_citas')
+
+# ------------------------------------------------------- Panel del salón ----
+@staff_member_required
+def panel_citas(request):
+    citas = Cita.objects.select_related('servicio', 'usuario')
+    return render(request, 'tienda/panel_citas.html', {
+        'pendientes': citas.filter(estado=Cita.PENDIENTE),
+        'recientes': citas.exclude(estado=Cita.PENDIENTE).order_by('-creada')[:20],
+    })
+
+
+@staff_member_required
+@require_POST
+def responder_cita(request, cita_id):
+    # Solo se puede responder una cita que siga en espera.
+    cita = get_object_or_404(Cita, pk=cita_id, estado=Cita.PENDIENTE)
+    mensaje = request.POST.get('mensaje', '').strip()[:300]
+    accion = request.POST.get('accion')
+    if accion == 'aceptar':
+        cita.aceptar(mensaje)
+        messages.success(request, f'Cita de {cita.cliente_nombre} aceptada.')
+    elif accion == 'rechazar':
+        cita.rechazar(mensaje)
+        messages.success(request, f'Cita de {cita.cliente_nombre} rechazada.')
+    else:
+        messages.error(request, 'Acción no válida.')
+    return redirect('tienda:panel_citas')
