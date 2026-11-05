@@ -41,5 +41,27 @@ class RegistroForm(UserCreationForm):
         fields = ('username', 'first_name', 'email')
         labels = {'username': 'Nombre de usuario'}
 
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Este correo ya está registrado en otra cuenta.')
+        return email
+
 class CancelacionForm(forms.Form):
     motivo = forms.CharField(max_length=300, required=False)
+
+class PerfilForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=150, label='Nombre')
+    email = forms.EmailField(label='Correo electrónico')
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+        labels = {'last_name': 'Apellido'}
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+        # Se excluye al propio usuario: puede guardar su mismo correo sin error.
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('Este correo ya pertenece a otra cuenta.')
+        return email
