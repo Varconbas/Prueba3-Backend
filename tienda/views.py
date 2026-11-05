@@ -1,7 +1,8 @@
 from datetime import date
 
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
@@ -11,7 +12,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from .forms import CancelacionForm, CitaForm, PagoForm, RegistroForm
 
-from .forms import CitaForm, PagoForm, RegistroForm
+from .forms import CancelacionForm, CitaForm, PagoForm, PerfilForm, RegistroForm
 from .models import (
     HORARIOS, PORCENTAJE_ABONO, Categoria, Cita, ItemPedido, Pedido, Producto,
 )
@@ -295,3 +296,33 @@ def responder_cita(request, cita_id):
     else:
         messages.error(request, 'Acción no válida.')
     return redirect('tienda:panel_citas')
+
+# ----------------------------------------------------------------- Perfil ---
+@login_required
+def perfil(request):
+    if request.method == 'POST':
+        form = PerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tus datos fueron actualizados.')
+            return redirect('tienda:perfil')
+        messages.error(request, 'No se guardaron los cambios. Revisa los campos marcados.')
+    else:
+        form = PerfilForm(instance=request.user)
+    return render(request, 'tienda/perfil.html', {'form': form})
+
+
+@login_required
+def cambiar_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            # Al cambiar la clave Django invalida la sesión; esto la mantiene activa.
+            update_session_auth_hash(request, usuario)
+            messages.success(request, 'Tu contraseña fue cambiada correctamente.')
+            return redirect('tienda:perfil')
+        messages.error(request, 'No se cambió la contraseña. Revisa los campos marcados.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'tienda/cambiar_password.html', {'form': form})
