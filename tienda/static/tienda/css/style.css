@@ -110,3 +110,11 @@ button.nav-btn { border: 0; background: none; cursor: pointer; font: inherit; fo
 .estado-CANCELADA  { background: #eee; color: #777; }
 
 .cancelar-form { display: flex; gap: .4rem; align-items: center; min-width: 260px; }
+
+/* Paginación */
+.paginacion { display: flex; justify-content: center; align-items: center; gap: .4rem; flex-wrap: wrap; margin-top: 2rem; }
+.pag-btn { padding: .45rem .9rem; border: 1px solid var(--border); border-radius: 999px; background: var(--white); color: var(--purple); font-weight: 500; font-size: .9rem; }
+a.pag-btn:hover { background: var(--pink-soft); border-color: var(--pink); }
+.pag-btn.active { background: var(--purple); border-color: var(--purple); color: var(--white); }
+.pag-puntos { color: var(--muted); padding: 0 .2rem; }
+.pag-resumen { text-align: center; margin-top: .75rem; font-size: .85rem; }
