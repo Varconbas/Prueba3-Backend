@@ -9,6 +9,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.core.paginator import Paginator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .forms import CancelacionForm, CitaForm, PagoForm, RegistroForm
 
@@ -27,19 +29,34 @@ def _nombre_de(usuario):
 
 
 # ----------------------------------------------------------------- Tienda ---
+PRODUCTOS_POR_PAGINA = 8
+
 def inicio(request):
     productos = Producto.objects.select_related('categoria')
     categorias = Categoria.objects.all()
-    categoria_id = request.GET.get('categoria')
-    if categoria_id and categoria_id.isdigit():
-        productos = productos.filter(categoria_id=int(categoria_id))
+
+    categoria_activa = None
+    categoria_id = request.GET.get('categoria', '')
+    if categoria_id.isdigit():
+        categoria_activa = int(categoria_id)
+        productos = productos.filter(categoria_id=categoria_activa)
+
+    paginador = Paginator(productos, PRODUCTOS_POR_PAGINA)
+    # get_page tolera valores inválidos: texto -> primera página, fuera de rango -> última.
+    pagina = paginador.get_page(request.GET.get('page'))
+    # Números a mostrar, con "…" si hay muchas páginas (ej: 1 … 4 5 6 … 12).
+    rango_paginas = [
+        n if n != Paginator.ELLIPSIS else '…'
+        for n in paginador.get_elided_page_range(pagina.number, on_each_side=1, on_ends=1)
+    ]
+
     return render(request, 'tienda/tienda.html', {
-        'productos': productos,
+        'productos': pagina,            # se puede recorrer igual que antes en el {% for %}
+        'pagina': pagina,
+        'rango_paginas': rango_paginas,
         'categorias': categorias,
-        'categoria_activa': int(categoria_id) if categoria_id and categoria_id.isdigit() else None,
+        'categoria_activa': categoria_activa,
     })
-
-
 # ---------------------------------------------------------------- Carrito ---
 # El carrito vive en la sesión: {"<id_producto>": cantidad}
 def _detalle_carrito(request):
@@ -79,8 +96,11 @@ def agregar_al_carrito(request, producto_id):
         carrito[clave] = nueva_cantidad
         request.session['carrito'] = carrito
         messages.success(request, f'«{producto.nombre}» agregado al carrito.')
+    # Vuelve a la misma página y categoría desde donde se agregó.
+    destino = request.POST.get('next', '')
+    if url_has_allowed_host_and_scheme(destino, allowed_hosts={request.get_host()}):
+        return redirect(destino)
     return redirect('tienda:inicio')
-
 
 @require_POST
 def actualizar_carrito(request, producto_id):
