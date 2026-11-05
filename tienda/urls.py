@@ -26,4 +26,6 @@ urlpatterns = [
     path('mis-compras/', views.mis_compras, name='mis_compras'),
     path('panel/citas/', views.panel_citas, name='panel_citas'),
     path('panel/citas/<int:cita_id>/responder/', views.responder_cita, name='responder_cita'),
+    path('perfil/', views.perfil, name='perfil'),
+    path('perfil/password/', views.cambiar_password, name='cambiar_password'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
