@@ -34,6 +34,7 @@
                     </div>
                     <form method="post" action="{% url 'tienda:agregar_al_carrito' producto.id %}">
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
                         <button class="btn gold" type="submit" {% if producto.stock == 0 %}disabled{% endif %}>Agregar al carrito</button>
                     </form>
                 </div>
@@ -42,6 +43,30 @@
             <p class="muted">Aún no hay productos. Agrégalos desde el panel de administración.</p>
             {% endfor %}
         </div>
+        {% if pagina.has_other_pages %}
+        <nav class="paginacion" aria-label="Paginación de productos">
+            {% if pagina.has_previous %}
+            <a class="pag-btn" href="?page={{ pagina.previous_page_number }}{% if categoria_activa %}&categoria={{ categoria_activa }}{% endif %}">« Anterior</a>
+            {% endif %}
+
+            {% for n in rango_paginas %}
+                {% if n == '…' %}
+                <span class="pag-puntos">…</span>
+                {% elif n == pagina.number %}
+                <span class="pag-btn active" aria-current="page">{{ n }}</span>
+                {% else %}
+                <a class="pag-btn" href="?page={{ n }}{% if categoria_activa %}&categoria={{ categoria_activa }}{% endif %}">{{ n }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagina.has_next %}
+            <a class="pag-btn" href="?page={{ pagina.next_page_number }}{% if categoria_activa %}&categoria={{ categoria_activa }}{% endif %}">Siguiente »</a>
+            {% endif %}
+        </nav>
+        <p class="muted pag-resumen">
+            Mostrando {{ pagina.start_index }}–{{ pagina.end_index }} de {{ pagina.paginator.count }} productos
+        </p>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
