@@ -23,6 +23,7 @@
                 {% if user.is_authenticated %}
                 <a class="nav-btn {% if request.resolver_match.url_name == 'mis_citas' %}active{% endif %}" href="{% url 'tienda:mis_citas' %}">Mis citas</a>
                 <a class="nav-btn {% if request.resolver_match.url_name == 'mis_compras' %}active{% endif %}" href="{% url 'tienda:mis_compras' %}">Mis compras</a>
+                <a class="nav-btn {% if request.resolver_match.url_name == 'perfil' or request.resolver_match.url_name == 'cambiar_password' %}active{% endif %}" href="{% url 'tienda:perfil' %}">Mi perfil</a>
                 <form method="post" action="{% url 'tienda:logout' %}" class="nav-form">
                     {% csrf_token %}
                     <button class="nav-btn" type="submit">Salir ({{ user.username }})</button>
