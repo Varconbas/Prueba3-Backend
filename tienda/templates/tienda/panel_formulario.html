@@ -1,0 +1,33 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}{{ titulo }} {{ destacado }} | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">{{ eyebrow }}</span>
+        <h2 class="title">{{ titulo }} <em>{{ destacado }}</em></h2>
+
+        <form method="post" enctype="multipart/form-data" class="pastel-card form-ancho">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for campo in form %}
+            <div class="form-group">
+                <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                <div class="{% if campo.name == 'productos_recomendados' %}checks{% endif %}">
+                    {{ campo }}
+                </div>
+                {% if campo.help_text %}<small class="ayuda">{{ campo.help_text }}</small>{% endif %}
+                {{ campo.errors }}
+            </div>
+            {% endfor %}
+            <div class="actions center-actions">
+                <button class="btn gold" type="submit">{{ boton }}</button>
+            </div>
+            <p style="text-align:center;margin-top:1rem">
+                <a href="{% url 'tienda:panel_catalogo' %}"><u>Cancelar y volver al catálogo</u></a>
+            </p>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Catálogo | RG Beauty SPA{% endblock %}
+
+{% block contenido %}
+<section class="sec">
+    <div class="wrap">
+        <span class="eyebrow">Gestión interna</span>
+        <h2 class="title">Mi <em>catálogo</em></h2>
+        <p class="lead">Agrega lo que vendes y los servicios que ofreces. Los cambios se ven al instante en el sitio.</p>
+
+        <div class="panel-acciones">
+            <h3>Productos ({{ total_productos }})</h3>
+            <a class="btn gold" href="{% url 'tienda:agregar_producto' %}">+ Agregar producto</a>
+        </div>
+        {% if productos %}
+        <p class="muted">Últimos agregados:</p>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto.nombre }}</td>
+                        <td>{{ producto.categoria|default:"—" }}</td>
+                        <td>${{ producto.precio }}</td>
+                        <td>{{ producto.stock }}</td>
+                        <td><a href="{% url 'admin:tienda_producto_change' producto.id %}"><u>Editar</u></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="muted">Aún no hay productos.</p>
+        {% endif %}
+
+        <div class="panel-acciones">
+            <h3>Servicios ({{ total_servicios }})</h3>
+            <a class="btn gold" href="{% url 'tienda:agregar_servicio' %}">+ Agregar servicio</a>
+        </div>
+        {% if servicios %}
+        <p class="muted">Últimos agregados:</p>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Nombre</th><th>Precio</th><th>Duración</th><th></th></tr></thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.nombre }}</td>
+                        <td>${{ servicio.precio }}</td>
+                        <td>{{ servicio.duracion_minutos }} min</td>
+                        <td><a href="{% url 'admin:tienda_servicio_change' servicio.id %}"><u>Editar</u></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="muted">Aún no hay servicios.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

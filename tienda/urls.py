@@ -28,4 +28,7 @@ urlpatterns = [
     path('panel/citas/<int:cita_id>/responder/', views.responder_cita, name='responder_cita'),
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/password/', views.cambiar_password, name='cambiar_password'),
+    path('panel/catalogo/', views.panel_catalogo, name='panel_catalogo'),
+    path('panel/catalogo/producto/nuevo/', views.agregar_producto, name='agregar_producto'),
+    path('panel/catalogo/servicio/nuevo/', views.agregar_servicio, name='agregar_servicio'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
