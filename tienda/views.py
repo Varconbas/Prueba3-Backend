@@ -14,11 +14,13 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .forms import CancelacionForm, CitaForm, PagoForm, RegistroForm
 
-from .forms import CancelacionForm, CitaForm, PagoForm, PerfilForm, RegistroForm
-from .models import (
-    HORARIOS, PORCENTAJE_ABONO, Categoria, Cita, ItemPedido, Pedido, Producto,
+from .forms import (
+    CancelacionForm, CitaForm, PagoForm, PerfilForm, ProductoForm,
+    RegistroForm, ServicioForm,
 )
-
+from .models import (
+    HORARIOS, PORCENTAJE_ABONO, Categoria, Cita, ItemPedido, Pedido, Producto, Servicio,
+)
 
 class StockInsuficiente(Exception):
     pass
@@ -346,3 +348,46 @@ def cambiar_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'tienda/cambiar_password.html', {'form': form})
+# ---------------------------------------------------- Catálogo (personal) ---
+@staff_member_required
+def panel_catalogo(request):
+    return render(request, 'tienda/panel_catalogo.html', {
+        'productos': Producto.objects.select_related('categoria').order_by('-id')[:10],
+        'servicios': Servicio.objects.order_by('-id')[:10],
+        'total_productos': Producto.objects.count(),
+        'total_servicios': Servicio.objects.count(),
+    })
+
+
+@staff_member_required
+def agregar_producto(request):
+    if request.method == 'POST':
+        # request.FILES lleva la imagen subida.
+        form = ProductoForm(request.POST, request.FILES)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto «{producto.nombre}» agregado a la tienda.')
+            return redirect('tienda:panel_catalogo')
+        messages.error(request, 'No se pudo guardar. Revisa los campos marcados.')
+    else:
+        form = ProductoForm()
+    return render(request, 'tienda/panel_formulario.html', {
+        'form': form, 'eyebrow': 'Catálogo', 'titulo': 'Agregar', 'destacado': 'producto',
+        'boton': 'Guardar producto',
+    })
+
+@staff_member_required
+def agregar_servicio(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            servicio = form.save()
+            messages.success(request, f'Servicio «{servicio.nombre}» agregado para las citas.')
+            return redirect('tienda:panel_catalogo')
+        messages.error(request, 'No se pudo guardar. Revisa los campos marcados.')
+    else:
+        form = ServicioForm()
+    return render(request, 'tienda/panel_formulario.html', {
+        'form': form, 'eyebrow': 'Catálogo', 'titulo': 'Agregar', 'destacado': 'servicio',
+        'boton': 'Guardar servicio',
+    })
