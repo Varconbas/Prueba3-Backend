@@ -69,7 +69,7 @@ th { background: var(--pink-soft); color: var(--purple-dark); font-size: .85rem;
 /* Formularios */
 .form-group { margin-bottom: 1.1rem; }
 .form-group label { display: block; font-weight: 600; margin-bottom: .35rem; font-size: .9rem; }
-input[type=text], input[type=date], input[type=number], input[type=email], input[type=password], select {    width: 100%; padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 10px; font: inherit; background: var(--white);
+input[type=text], input[type=date], input[type=number], input[type=email], input[type=password], textarea,select {    width: 100%; padding: .65rem .8rem; border: 1px solid var(--border); border-radius: 10px; font: inherit; background: var(--white);
 }
 .inline-form { display: flex; gap: .5rem; align-items: center; }
 .inline-form input[type=number] { width: 80px; }
@@ -118,3 +118,12 @@ a.pag-btn:hover { background: var(--pink-soft); border-color: var(--pink); }
 .pag-btn.active { background: var(--purple); border-color: var(--purple); color: var(--white); }
 .pag-puntos { color: var(--muted); padding: 0 .2rem; }
 .pag-resumen { text-align: center; margin-top: .75rem; font-size: .85rem; }
+
+/* Catálogo (personal) */
+.panel-acciones { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 2.5rem; }
+.panel-acciones h3 { margin: 0; }
+.form-ancho { max-width: 560px; margin: 1.5rem auto 0; }
+textarea { resize: vertical; }
+input[type=file] { width: 100%; }
+.ayuda { display: block; color: var(--muted); font-size: .8rem; margin-top: .25rem; }
+.form-group .checks label { display: flex; gap: .5rem; align-items: center; font-weight: 400; margin-bottom: .2rem; }
